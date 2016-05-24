@@ -16,6 +16,7 @@
   <button onclick="toggleMonitorAudio(this);">monitor audio (off) </button>
 
   <h2>Recordings</h2>
+  <canvas id="wavedisplay" width="1024" height="500"></canvas>
   <ul id="recordingslist"></ul>
 
   <h2>Log</h2>
@@ -32,14 +33,6 @@
 	    storageBucket: "local-recorder.appspot.com",
 	  };
 	  firebase.initializeApp(config);
-
-    var database = firebase.database();
-
-    firebase.database().ref('test').set({
-      foo: 'bar',
-    });
-
-
 	</script>
   <script>
   function __log(e, data) {
@@ -87,10 +80,18 @@
     __log('Stopped recording.');
 
     // create WAV download link using audio data blob
+    recorder.getBuffers(gotBuffers)
+
     createDownloadLink();
 
     recorder.clear();
   }
+
+  function gotBuffers(buffer) {
+  	var canvas = document.getElementById( "wavedisplay" );
+	  drawBuffer( canvas.width, canvas.height, canvas.getContext('2d'), buffers[0] );
+  }
+
 
   function createDownloadLink() {
     recorder && recorder.exportWAV(function(blob) {
